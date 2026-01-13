@@ -74,6 +74,18 @@ export const routes = [
     }]
   },
   {
+    path: '/propety',
+    component: Layout,
+    permission: 'propety',
+    meta: { title: '物业费管理', icon: 'el-icon-wallet' },
+    children: [{
+      path: '',
+      permission: 'propety:propertyFee',
+      component: () => import('@/views/Propety/index'),
+      meta: { title: '物业费管理' }
+    }]
+  },
+  {
     path: '/pole',
     component: Layout,
     permission: 'pole',
@@ -118,7 +130,7 @@ const createRouter = () => new Router({
   // mode: 'history', // require service support
   mode: 'history',
   scrollBehavior: () => ({ y: 0 }),
-  routes: routes
+  routes
 })
 
 const router = createRouter()
