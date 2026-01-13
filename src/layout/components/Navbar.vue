@@ -13,6 +13,7 @@
           <a target="_blank">
             <el-dropdown-item> 项目地址 </el-dropdown-item>
           </a>
+          <!-- el-dropdown-item内部没有this.$emit('click') .native可以点击原生事件 绑定为组件内的最外层元素 -->
           <el-dropdown-item divided @click.native="logout">
             <span style="display: block">退出登录</span>
           </el-dropdown-item>
@@ -27,6 +28,7 @@ export default {
   methods: {
     // 退出登录
     logout() {
+      this.$store.commit('user/removeToken')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     }
   }

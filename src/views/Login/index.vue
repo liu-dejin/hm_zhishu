@@ -15,7 +15,7 @@
           label="密码"
           prop="password"
         >
-          <el-input v-model="loginForm.password" />
+          <el-input v-model="loginForm.password" show-password />
         </el-form-item>
 
         <el-form-item prop="remember">
@@ -23,7 +23,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="login_btn" @click="handleLogin">登录</el-button>
+          <el-button type="primary" class="login_btn" @click="doLogin">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -31,16 +31,16 @@
 </template>
 
 <script>
-
+const FORMDATA_KEY = 'form_key'
 export default {
   name: 'Login',
   data() {
     return {
       loginForm: {
         username: 'demo',
-        password: '492itheima.CN032@.20260113'
+        password: `492itheima.CN032@.${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
+        remember: true
       },
-      remember: false,
       loginRules: {
         username: [
           { required: true, message: '请输入账号', trigger: 'blur' }
@@ -51,13 +51,41 @@ export default {
       }
     }
   },
+  mounted() {
+    const cacheFormStr = localStorage.getItem(FORMDATA_KEY)
+    if (cacheFormStr) {
+      this.cacheFormData = JSON.parse(cacheFormStr)
+      this.loginForm = {
+        ...this.loginForm,
+        ...this.cacheFormData
+      }
+    }
+  },
   methods: {
-    async handleLogin() {
+    // async await 对内同步对外异步
+    async doLogin() {
       const valid = await this.$refs.form.validate().catch(() => false)
       if (!valid) return
-      await this.$store.dispatch('user/doLogin', this.loginForm)
+      const { username, password, remember } = this.loginForm
+      await this.$store.dispatch('user/doLogin', { username, password })
+      // if (this.$route.query.redirect) {
+      //   this.$router.replace({ path: this.$route.query.redirect })
+      // } else {
+      //   this.$router.replace({ path: '/workbench' })
+      // }
+      // console.log(this.$route.query)
+
+      this.$router.replace({ path: this.$route.query.redirect ?? '/' })
       this.$message.success('登录成功')
-      this.$router.push({ path: '/workbench' })
+
+      if (remember) {
+        localStorage.setItem(FORMDATA_KEY, JSON.stringify({
+          username,
+          password
+        }))
+      } else {
+        localStorage.removeItem(FORMDATA_KEY)
+      }
     }
   }
 

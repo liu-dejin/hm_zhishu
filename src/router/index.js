@@ -5,6 +5,7 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import store from '@/store'
 
 export const routes = [
   {
@@ -143,4 +144,23 @@ export function resetRouter() {
   router.matcher = newRouter.matcher
 }
 
+// 路由前置守卫
+const WHITE_LIST = ['/login', '/404']
+router.beforeEach((to, from, next) => {
+  const token = store.state.user.token
+  if (token) {
+    if (to.path === '/login') {
+      next('/workbench')
+    } else {
+      next()
+    }
+  } else {
+    if (WHITE_LIST.includes(to.path)) {
+      next()
+    } else {
+      next(`/login?redirect=${to.fullPath}`)
+    }
+  }
+}
+)
 export default router
