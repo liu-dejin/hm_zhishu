@@ -1,8 +1,9 @@
+import store from '@/store'
 import axios from 'axios'
 // 创建axios实例
 const service = axios.create({
   // 基地址
-  baseURL: 'https://api-hmzs.itheima.net/v1',
+  baseURL: 'https://api-hmzs.itheima.net/api',
   // 超时时间
   timeout: 30000 // request timeout
 })
@@ -11,6 +12,10 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // 配置请求头携带token
+    const token = store.getters.token
+    if (token) {
+      config.headers.Authorization = token
+    }
     return config
   },
   error => {

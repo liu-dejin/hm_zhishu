@@ -1,39 +1,30 @@
+import { loginAPI } from '@/api/user'
+import { getToken, setToken } from '@/utils/auth'
+
 export default {
   namespaced: true,
-  state: {
-
+  state() {
+    return {
+      token: getToken() ?? ''
+    }
   },
   mutations: {
-
+    // mutations的方法只有一种调用方式 store.commit('mutations方法名', 载荷)  并没有方法名()这种调用方式
+    setToken(state, NewToken) {
+      state.token = NewToken
+      setToken(NewToken)
+    }
   },
   getters: {
-
+    token(state) {
+      return state.token
+    }
   },
-  actions: {}
+  actions: {
+    async doLogin({ commit }, { username, password }) {
+      const res = await loginAPI({ username, password })
+      commit('setToken', res.data.token)
+      setToken(res.data.token)
+    }
+  }
 }
-
-// 如何使用子模块的方法
-// this.$store.state.user
-/**
- * mapState computed(){
- * ...mapState('模块名', ['属性名1', '属性名2']),
- * }
- */
-// this.$store.getters['user/get方法名']
-/**
- * mapGetters computed(){
- * ...mapGetters('模块名', ['get方法名1', 'get方法名2']),
- * }
- */
-// this.$store.commit('模块名/方法名', 载荷(新值))
-/**
- * mapMutations methods{
- * ...mapMutations('模块名', ['方法名1', '方法名2']),
- * }
- */
-// this.$store.dispatch('模块名/方法名', 载荷(新值))
-/**
- * mapActions methods{
- * ...mapActions('模块名', ['方法名1', '方法名2']),
- * }
- */
