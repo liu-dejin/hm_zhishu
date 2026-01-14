@@ -26,7 +26,7 @@
 <script>
 export default {
   methods: {
-    // 退出登录
+    // 退出登录 先清空用户信息再跳转
     logout() {
       this.$store.commit('user/removeToken')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)

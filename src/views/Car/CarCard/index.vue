@@ -3,14 +3,14 @@
     <!-- 搜索区域 -->
     <div class="search-container">
       <span class="search-label">车牌号码：</span>
-      <el-input clearable placeholder="请输入内容" class="search-main" />
+      <el-input v-model.trim="params.carNumber" clearable placeholder="请输入内容" class="search-main" @clear="getCarList" />
       <span class="search-label">车主姓名：</span>
-      <el-input clearable placeholder="请输入内容" class="search-main" />
+      <el-input v-model.trim="params.personName" clearable placeholder="请输入内容" class="search-main" @clear="getCarList" />
       <span class="search-label">状态：</span>
       <el-select v-model="params.cardStatus" placeholder="请选择">
-        <el-option v-for="item in []" :key="item.id" />
+        <el-option v-for="item in cardStatusList" :key="item.id" :label="item.label" :value="item.value" />
       </el-select>
-      <el-button type="primary" class="search-btn">查询</el-button>
+      <el-button type="primary" class="search-btn" @click="handleSearch">查询</el-button>
     </div>
     <!-- 新增删除操作区域 -->
     <div class="create-container">
@@ -97,7 +97,21 @@ export default {
         cardStatus: null
       },
       carList: [],
-      total: 0
+      total: 0,
+      cardStatusList: [
+        {
+          label: '全部',
+          value: null
+        },
+        {
+          label: '可用',
+          value: 0
+        },
+        {
+          label: '已过期',
+          value: 1
+        }
+      ]
     }
   },
   created() {
@@ -113,8 +127,8 @@ export default {
       // 方案一 return cellValue === 1 ? '正常' : '已过期'
       // 方案二 return row.cardStatus === 1 ? '正常' : '已过期'
       const Map = {
-        1: '正常',
-        0: '已过期'
+        0: '可用',
+        1: '已过期'
       }
       return Map[cellValue]
     },
@@ -129,8 +143,11 @@ export default {
     indexMethod(index) {
       // 当前页-1 * 页容量 +  index+1
       return (this.params.page - 1) * this.params.pageSize + index + 1
+    },
+    handleSearch() {
+      this.params.page = 1
+      this.getCarList()
     }
-
   }
 }
 </script>
