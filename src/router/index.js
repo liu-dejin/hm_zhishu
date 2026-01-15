@@ -45,7 +45,6 @@ export const routes = [
       component: () => import('@/views/Park/Enterprise/index')
     }]
   },
-
   {
     path: '/parking',
     component: Layout,
@@ -85,6 +84,10 @@ export const routes = [
       component: () => import('@/views/Propety/index'),
       meta: { title: '物业费管理' }
     }]
+  },
+  {
+    path: '/car/addMonthCard',
+    component: () => import('@/views/Car/CarCard/addMonthCard')
   },
   {
     path: '/pole',

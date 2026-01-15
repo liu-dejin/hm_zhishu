@@ -14,12 +14,14 @@
     </div>
     <!-- 新增删除操作区域 -->
     <div class="create-container">
-      <el-button type="primary">添加月卡</el-button>
-      <el-button>批量删除</el-button>
+      <el-button type="primary" @click="$router.push('/car/addMonthCard')">添加月卡</el-button>
+      <el-button @click="batchDelete">批量删除</el-button>
     </div>
     <!-- 表格区域 -->
     <div class="table">
-      <el-table style="width: 100%" :data="carList">
+      <el-table style="width: 100%" :data="carList" @selection-change="handleSelectionChange">
+        <!-- 选择框 -->
+        <el-table-column type="selection" width="55" />
         <el-table-column type="index" :index="indexMethod" label="序号" />
         <el-table-column prop="personName" label="车主名称" />
         <el-table-column prop="phoneNumber" label="联系方式" />
@@ -37,8 +39,8 @@
           <template #default="scope">
             <el-button size="mini" type="text">续费</el-button>
             <el-button size="mini" type="text">查看</el-button>
-            <el-button size="mini" type="text">编辑</el-button>
-            <el-button size="mini" type="text">删除</el-button>
+            <el-button size="mini" type="text" @click="EditCard(scope.row.id)">编辑</el-button>
+            <el-button size="mini" type="text" @click="DeleteCard(scope.row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -85,7 +87,7 @@
 </template>
 
 <script>
-import { getCarListApi } from '@/api/card'
+import { deleteCarCardApi, getCarListApi } from '@/api/card'
 export default {
   data() {
     return {
@@ -111,18 +113,21 @@ export default {
           label: '已过期',
           value: 1
         }
-      ]
+      ],
+      selectedRows: []
     }
   },
   created() {
     this.getCarList()
   },
   methods: {
+    // 获取月卡列表
     async getCarList() {
       const res = await getCarListApi(this.params)
       this.carList = res.data.rows
       this.total = res.data.total
     },
+    // 格式化状态
     formatCardStatus(row, column, cellValue, index) {
       // 方案一 return cellValue === 1 ? '正常' : '已过期'
       // 方案二 return row.cardStatus === 1 ? '正常' : '已过期'
@@ -132,21 +137,72 @@ export default {
       }
       return Map[cellValue]
     },
+    // 分页大小改变时触发
     handleSizeChange(val) {
       this.params.pageSize = val
       this.getCarList()
     },
+    // 分页改变时触发
     handleCurrentChange(val) {
       this.params.page = val
       this.getCarList()
     },
+    // 序号
     indexMethod(index) {
       // 当前页-1 * 页容量 +  index+1
       return (this.params.page - 1) * this.params.pageSize + index + 1
     },
+    // 查询
     handleSearch() {
       this.params.page = 1
       this.getCarList()
+    },
+    // 编辑月卡
+    EditCard(id) {
+      this.$router.push({
+        path: '/car/addMonthCard',
+        query: {
+          id
+        }
+      })
+    },
+    // 删除月卡
+    async DeleteCard(id) {
+      const cfm = await this.$confirm('确认删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(() => false)
+      if (cfm) {
+        await deleteCarCardApi(id)
+        this.$message.success('删除成功')
+        if (this.carList.length === 1 && this.params.page > 1) {
+          this.params.page--
+        }
+        this.getCarList()
+      }
+    },
+    handleSelectionChange(val) {
+      this.selectedRows = val
+    },
+    // 批量删除
+    async batchDelete() {
+      if (this.selectedRows.length === 0) {
+        return this.$message.warning('请选择要删除的月卡')
+      }
+      const cfm = await this.$confirm('确认删除选中月卡吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(() => false)
+      if (cfm) {
+        await deleteCarCardApi(this.selectedRows.map(item => item.id).join(','))
+        this.$message.success('删除成功')
+        if (this.carList.length === 1 && this.params.page > 1) {
+          this.params.page--
+        }
+        this.getCarList()
+      }
     }
   }
 }
